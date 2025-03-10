@@ -1,0 +1,190 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:AikaHelper.ViewModels"
+        xmlns:models="clr-namespace:AikaHelper.Models"
+        xmlns:aika="clr-namespace:AikaHelper"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800"
+        Height="600"
+        x:Class="AikaHelper.MainWindow"
+        Title="AcFun爱咔下载助手"
+        x:DataType="viewModels:MainWindowViewModel">
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <DataTemplate x:Key="ContentTemplate" DataType="models:GetChannelData">
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+                    <TextBox Grid.Row="0" Grid.Column="0"
+                             Watermark="爱咔号"
+                             UseFloatingWatermark="True"
+                             aika:TextBoxBehavior.SelectAllOnFocus="True"
+                             Margin="5"
+                             Text="{Binding StreamId}"
+                             IsReadOnly="True" />
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Watermark="直播标题"
+                             UseFloatingWatermark="True"
+                             aika:TextBoxBehavior.SelectAllOnFocus="True"
+                             Margin="5"
+                             Text="{Binding Name}"
+                             IsReadOnly="True" />
+                    <TextBox Grid.Row="1" Grid.Column="0"
+                             Watermark="主播ID"
+                             UseFloatingWatermark="True"
+                             aika:TextBoxBehavior.SelectAllOnFocus="True"
+                             Margin="5"
+                             Text="{Binding UserId}"
+                             IsReadOnly="True" />
+                    <TextBox Grid.Row="1" Grid.Column="1"
+                             Watermark="主播昵称"
+                             UseFloatingWatermark="True"
+                             aika:TextBoxBehavior.SelectAllOnFocus="True"
+                             Margin="5"
+                             Text="{Binding Nickname}"
+                             IsReadOnly="True" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                               Margin="5"
+                               Text="{Binding Time}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                               Margin="5"
+                               HorizontalAlignment="Right"
+                               Text="{Binding Duration}" />
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate x:Key="RemoteLivesItemTemplate" DataType="models:GetChannelData">
+                <Border BorderThickness="1" BorderBrush="#333" Background="#EEE" Margin="0,10" CornerRadius="10">
+                    <Grid ColumnDefinitions="*,*"
+                          RowDefinitions="Auto,Auto"
+                          Margin="10">
+                        <ContentControl Grid.Row="0"
+                                        Content="{Binding}"
+                                        ContentTemplate="{StaticResource ContentTemplate}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"
+                                   Margin="5"
+                                   Text="{Binding ExpireTime}" />
+                        <Button Grid.Row="1" Grid.Column="1"
+                                IsEnabled="{Binding CanDownloadRemote}"
+                                HorizontalAlignment="Right"
+                                Content="{Binding $parent[ItemsControl].((viewModels:MainWindowViewModel)DataContext).DownloadButtonCaption}"
+                                Command="{Binding $parent[ItemsControl].((viewModels:MainWindowViewModel)DataContext).GetStreamCommand}"
+                                CommandParameter="{Binding}"/>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
+            <DataTemplate x:Key="LocalLivesItemTemplate" DataType="models:GetChannelData">
+                <Border BorderThickness="1" BorderBrush="#333" Background="#EEE" Margin="0,10" CornerRadius="10">
+                    <Grid ColumnDefinitions="*,*"
+                          RowDefinitions="Auto,Auto"
+                          Margin="10">
+                        <ContentControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Content="{Binding}"
+                                        ContentTemplate="{StaticResource ContentTemplate}" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"
+                                   Margin="5"
+                                   Text="{Binding ExpireTime}" />
+                        <Button Grid.Row="1" Grid.Column="1" 
+                                IsEnabled="{Binding CanDownloadLocal}"
+                                HorizontalAlignment="Right"
+                                Content="{Binding $parent[ItemsControl].((viewModels:MainWindowViewModel)DataContext).DownloadButtonCaption}"
+                                Command="{Binding $parent[ItemsControl].((viewModels:MainWindowViewModel)DataContext).GetStreamCommand}"
+                                CommandParameter="{Binding}"/>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
+            <ItemsPanelTemplate x:Key="LivesItemsPanelTemplate">
+                <VirtualizingStackPanel Margin="20,0"/>
+            </ItemsPanelTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <TabControl>
+        <TabItem Header="本地">
+            <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto,*">
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">主播UID：</TextBlock>
+                <AutoCompleteBox Margin="5,0" Grid.Row="0" Grid.Column="1" ItemsSource="{Binding UserIds}"
+                                 FilterMode="Contains" Text="{Binding Uid, Mode=TwoWay}" />
+                <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="2">主播昵称：</TextBlock>
+                <AutoCompleteBox Margin="5,0" Grid.Row="0" Grid.Column="3" ItemsSource="{Binding Nicknames}"
+                                 FilterMode="Contains" Text="{Binding Name, Mode=TwoWay}" />
+                <Button Grid.Row="1" Grid.Column="3" Margin="0,10" Command="{Binding SearchCommand}">搜索</Button>
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Background="#DDD" Margin="0,0,0,12"
+                        Padding="0,20"
+                        CornerRadius="10">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Local}">
+                            <ItemsControl.ItemsPanel>
+                                <StaticResource ResourceKey="LivesItemsPanelTemplate" />
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <StaticResource ResourceKey="LocalLivesItemTemplate" />
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </TabItem>
+        <TabItem Header="在线">
+            <Grid Margin="10">
+                <Border IsVisible="{Binding NeedLogin}">
+                    <StackPanel>
+                        <Button HorizontalAlignment="Center" IsVisible="{Binding LoginFailed}"
+                                Command="{Binding QrLoginCommand}">
+                            二维码登录
+                        </Button>
+                        <Image Width="256" Height="256" Source="{Binding QrCode}" />
+                        <TextBlock TextAlignment="Center" Text="{Binding LoginCaption}" />
+                    </StackPanel>
+                </Border>
+                <Border IsVisible="{Binding !NeedLogin}">
+                    <Grid RowDefinitions="Auto,Auto,Auto,*">
+                        <UniformGrid Columns="2">
+                            <Image Height="64" Width="64" Source="{Binding UserAvatar }" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding UserName}" />
+                        </UniformGrid>
+                        <UniformGrid Grid.Row="1" Columns="5" IsVisible="{Binding !NeedLogin}">
+                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">爱咔号</TextBlock>
+                            <NumericUpDown Value="{Binding Id, Mode=TwoWay}" Minimum="1400000" Increment="1" />
+                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">数量</TextBlock>
+                            <NumericUpDown Value="{Binding Count, Mode=TwoWay}" Minimum="-200" Maximum="200"
+                                           Increment="1" />
+                            <Button IsVisible="{Binding !IsFetching}" HorizontalAlignment="Center"
+                                    Command="{Binding FetchLiveCommand}">
+                                开始
+                            </Button>
+                            <Button IsVisible="{Binding IsFetching}" HorizontalAlignment="Center"
+                                    Command="{Binding StopCommand}">
+                                停止
+                            </Button>
+                        </UniformGrid>
+                        <ProgressBar Grid.Row="2" IsVisible="{Binding IsFetching}"
+                                     Foreground="#66CCFF"
+                                     Margin="0,10" Height="20"
+                                     Minimum="0"
+                                     Maximum="{Binding ProgressTarget}"
+                                     Value="{Binding Current}"
+                                     ShowProgressText="True" />
+                        <Border Grid.Row="3" Background="#DDD" Margin="0,0,0,12" Padding="0,20"
+                                CornerRadius="10">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Lives}">
+                                    <ItemsControl.ItemsPanel>
+                                        <StaticResource ResourceKey="LivesItemsPanelTemplate" />
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <StaticResource ResourceKey="RemoteLivesItemTemplate" />
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>
