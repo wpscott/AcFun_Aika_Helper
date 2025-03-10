@@ -364,7 +364,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
                 FileName = M3U8,
                 Arguments =
-                    $"\"{detail.StreamUrls[0]}\" --save-name \"{TimeZoneInfo.ConvertTime(detail.StartTime, GetChannelData.TimeZoneInfo):yyyy-MM-dd} [{Sanitizer(detail.Nickname)}]{Sanitizer(detail.Name)}\" --ffmpeg-binary-path \"{Ffmpeg}\"",
+                    $"\"{detail.StreamUrls[0]}\" --save-name \"[{TimeZoneInfo.ConvertTime(detail.StartTime, GetChannelData.TimeZoneInfo):yyyy-MM-dd HH-mm-ss}][{Sanitizer(detail.Nickname)}]{Sanitizer(detail.Name)}\" --ffmpeg-binary-path \"{Ffmpeg}\"",
                 UseShellExecute = false,
                 CreateNoWindow = false
             };
